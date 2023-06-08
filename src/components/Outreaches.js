@@ -1,9 +1,60 @@
 import DownloadIcon from '@mui/icons-material/Download';
 import SettingsIcon from '@mui/icons-material/Settings';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import axios from 'axios';
+import {connect} from "react-redux"
 
 
-function Outreaches() {
+function Outreaches({state,stateChange}) {
+    
+    const data={"username":"solusdev@solus.ai","password":"solus@1231"}
+
+
+    const helper=(tkn,city)=>{
+        
+        let body = JSON.stringify({
+            "CITY":city==="NA"?-1:city,
+        });
+
+        axios.post('https://cartbeui.solus.ai/api/solus/ui/dashboard_graph_display',body,{
+            headers: {
+                "Content-Type": "application/json",
+                "cache-control": "no-cache",
+                "x-access-token":tkn
+              },
+        })
+            .then(response => {
+                console.log("got the data through api")
+                console.log("resp**",response.data); // Handle the response data
+
+                console.log("[<->]",typeof JSON.parse(response.data))
+
+                stateChange(JSON.parse(response.data))
+            })
+            .catch(error => {
+                console.error(error); // Handle any errors
+            });
+    }
+
+   
+    const handleChange=(e)=>{
+        // console.log("-->",e.target.value)
+        axios.post('https://cartbeui.solus.ai/api/auth/signin', data,{
+            headers: {
+                "Content-Type": "application/json",
+                "cache-control": "no-cache",
+              },
+        })
+            .then(response => {
+                helper(response.data.accessToken,e.target.value)
+                console.log("signed it")
+                console.log(response.data.accessToken); // Handle the response data
+            })
+            .catch(error => {
+                console.error(error); // Handle any errors
+            });
+    }
+
     return ( 
         <div className="mt-4 bg-white py-2 rounded-lg ">
             <div className='flex justify-center'>
@@ -14,8 +65,12 @@ function Outreaches() {
                     <option className='font-semibold'>Select Segment</option>
                 </select>
 
-                <select className="form-select w-80">
+                <select className="form-select w-80" onChange={(e)=>handleChange(e)}>
                     <option className='font-semibold'>Select Rev.Centre</option>
+                    <option className='font-semibold' name="Bangaluru">Bangaluru</option>
+                    <option className='font-semibold' name="Chennai">Chennai</option>
+                    <option className='font-semibold' name="Hyderabad">Hyderabad</option>
+                    <option className='font-semibold' name="NA">NA</option>              
                 </select>
 
                 <div className='flex items-center '>
@@ -43,4 +98,17 @@ function Outreaches() {
      );
 }
 
-export default Outreaches;
+
+const mapStateToProps=(state)=>{
+    return {
+        data:state.data.data
+    }
+}
+
+const mapDispatchToProps=(dispatch)=>{
+    return {
+        stateChange:(datas)=>dispatch({type:"FILL_DATA",payload:datas})
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(Outreaches);

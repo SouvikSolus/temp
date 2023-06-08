@@ -14,7 +14,6 @@ function Performance({item}) {
                             <p className="bg-[#EAF8FE] flex px-1 py-[5px]">- {item.split("-h")[0]}</p>
                         </div>
                     )}
-
                     <hr />
                 </div>
             ):(
